@@ -22,13 +22,13 @@ Repo: https://github.com/Guamboss671/guam-autoweb.git
 - [x] Full project scaffold committed and pushed to GitHub
 - [x] 5 manual leads loaded into `data/leads.json`: Butterhouse, Lovely Nails, Geno's Auto Service Guam, Da Local Grindhouse, Sty Frsh
 - [x] Local JSON DB adapter (`packages/db/local.ts`) — mirrors Supabase interface so dev works offline
-- [x] Supabase migration script ready (`scripts/migrate-to-supabase.ts`)
-- [x] Anthropic API key set in `.env`
-- [x] Database schema SQL written (`packages/db/migrations/001_initial_schema.sql`)
+- [x] Supabase project configured — URL and keys set, schema migrated, 5 leads live in DB
+- [x] Anthropic API key set in `.env` and `apps/dashboard/.env.local`
+- [x] Database schema created in Supabase (leads, clients, sites, outreach, analytics_reports tables)
+- [x] npm install done
+- [x] Dashboard running at localhost:3000 — shows 5 leads from Supabase
 
 ### Not Done Yet
-- [ ] `npm install` — dependencies not installed (no node_modules)
-- [ ] Supabase project setup — URL and keys still placeholder in `.env`
 - [ ] Apify token (for Google Maps scraping)
 - [ ] Resend API key (for email outreach)
 - [ ] Twilio credentials (for SMS outreach)
