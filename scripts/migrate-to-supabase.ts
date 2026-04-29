@@ -15,9 +15,11 @@ async function migrate() {
   const leads = getAllLeads();
   console.log(`Migrating ${leads.length} leads to Supabase...`);
 
+  const leadsWithoutId = leads.map(({ id, ...rest }) => rest);
+
   const { error } = await supabase
     .from('leads')
-    .upsert(leads, { onConflict: 'business_name,address' });
+    .upsert(leadsWithoutId, { onConflict: 'business_name,address' });
 
   if (error) {
     console.error('Migration failed:', error.message);
