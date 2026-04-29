@@ -12,13 +12,13 @@ export default function SitePage() {
   const isPreview = process.env.SITE_STATUS === 'preview';
 
   return (
-    <main style={{ '--color-primary': data.colorPalette.primary, '--color-secondary': data.colorPalette.secondary, '--color-accent': data.colorPalette.accent } as React.CSSProperties}>
+    <main>
       {isPreview && <PreviewBanner businessName={data.businessName} />}
       <Hero data={data} />
-      <Services services={data.services} />
-      <About aboutText={data.aboutText} businessName={data.businessName} />
+      <Services services={data.services} colorPalette={data.colorPalette} />
+      <About aboutText={data.aboutText} businessName={data.businessName} colorPalette={data.colorPalette} />
       <Gallery photos={data.photos} businessName={data.businessName} />
-      <Testimonials reviews={data.reviews} />
+      <Testimonials reviews={data.reviews} colorPalette={data.colorPalette} />
       <Contact lead={data} />
     </main>
   );

@@ -51,5 +51,6 @@ Return JSON exactly matching this structure:
   });
 
   const text = (message.content[0] as Anthropic.TextBlock).text;
-  return JSON.parse(text) as SiteData;
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  return JSON.parse(cleaned) as SiteData;
 }

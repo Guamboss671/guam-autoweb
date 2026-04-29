@@ -1,6 +1,8 @@
 // Injected at build time by the site-builder agent via Vercel env vars
 export function getSiteData() {
-  const raw = process.env.SITE_DATA;
+  const raw = process.env.SITE_DATA_B64
+    ? Buffer.from(process.env.SITE_DATA_B64, 'base64').toString('utf-8')
+    : process.env.SITE_DATA;
   const siteData = raw ? JSON.parse(raw) : {};
 
   return {
