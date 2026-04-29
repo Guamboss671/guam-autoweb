@@ -1,14 +1,19 @@
 /**
- * Generate AI site content for a lead and write it to site-template/.env.local
- * Usage: npx tsx scripts/preview-lead.ts "Butterhouse"
+ * Generate AI content for a lead and deploy a preview site to Vercel
+ * Usage: npx tsx scripts/deploy-preview.ts "Butterhouse Barber & Beauty Salon"
  */
 import 'dotenv/config';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { generateSiteContent } from '../packages/agents/site-builder/generate-content.js';
 import type { Lead } from '../packages/shared/types/index.js';
 
-const businessName = process.argv[2] ?? 'Butterhouse';
+const businessName = process.argv[2];
+if (!businessName) {
+  console.error('Usage: npx tsx scripts/deploy-preview.ts "Business Name"');
+  process.exit(1);
+}
 
 const LEADS: Record<string, Partial<Lead>> = {
   'Butterhouse Barber & Beauty Salon': { category: 'Barber & Beauty Salon', address: '141 Macheche Ave, Dededo, Guam 96929', city: 'Dededo', phone: null },
@@ -46,22 +51,49 @@ const lead: Lead = {
 };
 
 async function main() {
-  console.log(`Generating site content for: ${businessName}...`);
+  console.log(`\n[1/3] Generating AI content for: ${businessName}...`);
   const siteData = await generateSiteContent(lead);
-  console.log('Generated:', JSON.stringify(siteData, null, 2));
-
-  const envPath = path.join(process.cwd(), 'apps', 'site-template', '.env.local');
   const encoded = Buffer.from(JSON.stringify(siteData)).toString('base64');
-  const envContent = [
+
+  // Write env vars to site-template for the deployment
+  const templateDir = path.join(process.cwd(), 'apps', 'site-template');
+  const envPath = path.join(templateDir, '.env.production');
+
+  fs.writeFileSync(envPath, [
     `SITE_DATA_B64=${encoded}`,
     `BUSINESS_NAME=${businessName}`,
+    `BUSINESS_ADDRESS=${info.address ?? 'Guam'}`,
+    `BUSINESS_PHONE=${info.phone ?? ''}`,
     `SITE_ID=preview`,
     `SITE_STATUS=preview`,
-  ].join('\n');
+  ].join('\n'));
 
-  fs.writeFileSync(envPath, envContent);
-  console.log(`\nWrote to ${envPath}`);
-  console.log('Now run: cd apps/site-template && npx next dev -p 3001');
+  console.log(`[2/3] Deploying to Vercel...`);
+
+  try {
+    // Strip Vercel project-specific env vars so CLI creates a fresh project
+    const env = { ...process.env };
+    delete env.VERCEL_ORG_ID;
+    delete env.VERCEL_PROJECT_ID;
+
+    const result = execSync(
+      `npx vercel deploy ${templateDir} --prod --yes --token=${process.env.VERCEL_TOKEN} --scope guamboss671s-projects`,
+      { encoding: 'utf-8', cwd: process.cwd(), env }
+    );
+
+    const aliasMatch = result.match(/Aliased:\s+(https:\/\/[^\s\[]+)/);
+    const prodMatch = result.match(/Production:\s+(https:\/\/[^\s\[]+)/);
+    const url = (aliasMatch?.[1] ?? prodMatch?.[1] ?? '').trim();
+
+    console.log(`[3/3] Done!\n`);
+    console.log(`Preview URL: ${url}`);
+    console.log(`\nSend this link to ${businessName}!`);
+
+    return url;
+  } finally {
+    // Clean up production env file
+    if (fs.existsSync(envPath)) fs.unlinkSync(envPath);
+  }
 }
 
 main().catch(console.error);
